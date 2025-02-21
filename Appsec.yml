@@ -20,14 +20,7 @@ permissions:
     owner: root
     group: root
     mode: 755
-
-# Hooks section defines the lifecycle event hooks (like before and after the deployment)
 hooks:
-  # Before installing the new code, make sure no other applications are running (example).
-  BeforeInstall:
-    - location: /home/ubuntu/fresh/scripts/stop.sh
-      timeout: 300
-      runas: root
   # After installation, start the app securely.
   ApplicationStart:
     - location: /home/ubuntu/fresh/scripts/start_up.sh
