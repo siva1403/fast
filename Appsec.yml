@@ -1,1 +1,40 @@
+version: 0.0
+os: ubuntu
+
+# Files section specifies the files to be copied from S3 or GitHub to the target EC2 instance
+files:
+  - source: /app/
+    destination: /home/ubuntu/fresh/
+    overwrite: true
+
+# Permissions section defines the file permissions for the destination files
+permissions:
+  - object: /home/ubuntu/fresh/*
+    pattern: "**"
+    owner: ubuntu
+    group: ubuntu
+    mode: 755
+
+  # Specific permissions for the app's start script to ensure it can be executed
+  - object: /home/ubuntu/fresh/start_up.sh
+    owner: root
+    group: root
+    mode: 755
+
+# Hooks section defines the lifecycle event hooks (like before and after the deployment)
+hooks:
+  # Before installing the new code, make sure no other applications are running (example).
+  BeforeInstall:
+    - location: /home/ubuntu/fresh/scripts/stop.sh
+      timeout: 300
+      runas: root
+  # After installation, start the app securely.
+  ApplicationStart:
+    - location: /home/ubuntu/fresh/scripts/start_up.sh
+      timeout: 300
+      runas: root
+# Optional: Specify specific CloudWatch log groups if needed for monitoring
+# logs:
+#   - group: /aws/codeploy/myapp
+#     stream: deployment_log
 
