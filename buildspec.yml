@@ -1,3 +1,12 @@
+version: 0.2
+
+env:
+  variables:
+    APP_NAME: "fresh"
+    S3_BUCKET: "siva14"
+    DEPLOYMENT_GROUP: "my-deployment-group"
+    REGION: "us-west-2"
+
 phases:
   pre_build:
     commands:
