@@ -28,11 +28,17 @@ phases:
       - echo "moving jarfile to output"
       - ls
       - BUILD_VERSION=$(TZ=IST date +"%Y-%m-%d-%H-%M-%S")
-      - mkdir fresh
+      - mkdir -p fresh
       - cp target/*.jar ./fresh/
       - cp appspec.yml startup.sh ./fresh
       - zip -r "fresh_${BUILD_VERSION}.zip" ./fresh
       - aws s3 cp "fresh_${BUILD_VERSION}.zip" s3://siva14
+
+   artifacts:
+  files:
+    - appspec.yml
+    - startup.sh
+    - fresh/*   
      
 
 cache:
