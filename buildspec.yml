@@ -1,48 +1,30 @@
-version: 0.2
-
-env:
-  variables:
-    APP_NAME: "fresh"
-    S3_BUCKET: "siva14"
-    DEPLOYMENT_GROUP: "my-deployment-group"
-    REGION: "us-west-2"
-
 phases:
-  install:
-    runtime-versions:
-      java: openjdk11
-    commands:
-      # Installing necessary dependencies (e.g., Java, Maven, etc.)
-      echo "Installing dependencies..."
-      sudo apt-get update
-      sudo apt-get install -y maven
-      sudo apt-get install -y awscli
-
   pre_build:
     commands:
-      # Optional: Prepare for the build, e.g., checkout code, setup environment
-      echo "Preparing build environment..."
-      mvn clean install  # For a Java-based application (adjust for your project)
+      - echo "Installing Java and maven"
+      - apt-get update
+      - apt-get install -y openjdk-11-jdk
+      - java -version
+      - apt-get install maven
 
   build:
     commands:
-      # Build commands for your application
-      echo "Building the application..."
-      mvn package  # Example for a Maven project; adjust as needed
+      - echo "Building Spring Boot application with Gradle"
+      - mvn clean install
 
   post_build:
     commands:
-      # After the build is complete, upload to S3 for EC2 CodeDeploy or further steps
-      echo "Uploading artifact to S3..."
-      aws s3 cp target/$APP_NAME.jar s3://$S3_BUCKET/$APP_NAME.jar
+      - echo "Build completed successfully"
+      - echo "moving jarfile to output"
+      - ls
+      - BUILD_VERSION=$(TZ=IST date +"%Y-%m-%d-%H-%M-%S")
+      - mkdir fresh
+      - cp target/*.jar ./fresh/
+      - cp appspec.yml startup.sh ./fresh
+      - zip -r "fresh_${BUILD_VERSION}.zip" ./fresh
+      - aws s3 cp "fresh_${BUILD_VERSION}.zip" s3://siva14
+     
 
-      # You could also trigger a CodeDeploy deployment here, for example:
-      # aws deploy create-deployment --application-name $APP_NAME \
-      #     --deployment-group-name $DEPLOYMENT_GROUP \
-      #     --s3-location bucket=$S3_BUCKET,key=$APP_NAME.jar,bundleType=jar
-
-artifacts:
-  files:
-    - target/*.jar  # Include all built jar files (adjust path based on your project)
-    - scripts/**  # Include any deployment scripts if applicable
-
+cache:
+  paths:
+    - ~/.m2/repository
